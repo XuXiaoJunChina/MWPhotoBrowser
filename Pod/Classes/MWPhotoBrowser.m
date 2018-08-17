@@ -50,7 +50,6 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 }
 
 - (void)_initialisation {
-    
     // Defaults
     NSNumber *isVCBasedStatusBarAppearanceNum = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIViewControllerBasedStatusBarAppearance"];
     if (isVCBasedStatusBarAppearanceNum) {
@@ -82,6 +81,8 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     _currentGridContentOffset = CGPointMake(0, CGFLOAT_MAX);
     _didSavePreviousStateOfNavBar = NO;
     self.automaticallyAdjustsScrollViewInsets = NO;
+    
+    _displayImagSizeHidden =  NO;
     
     // Listen for MWPhoto notifications
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -135,7 +136,6 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
-    
     // Validate grid settings
     if (_startOnGrid) _enableGrid = YES;
     if (_enableGrid) {
@@ -158,7 +158,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 	_pagingScrollView.backgroundColor = [UIColor blackColor];
     _pagingScrollView.contentSize = [self contentSizeForPagingScrollView];
 	[self.view addSubview:_pagingScrollView];
-	
+    
     // Toolbar
     _toolbar = [[UIToolbar alloc] initWithFrame:[self frameForToolbarAtOrientation:self.interfaceOrientation]];
     _toolbar.tintColor = [UIColor whiteColor];
@@ -167,6 +167,23 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     [_toolbar setBackgroundImage:nil forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsLandscapePhone];
     _toolbar.barStyle = UIBarStyleBlackTranslucent;
     _toolbar.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+    
+    //查看原图
+    if (!self.displayImagSizeHidden) {
+        _originalImageBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        _originalImageBtn.frame = CGRectMake((self.view.frame.size.width - self.view.frame.size.width/2)/2.0, self.view.frame.size.height - 44 - 30, self.view.frame.size.width/2, 44);
+        [_originalImageBtn setTitle:self.originalImageSize forState:UIControlStateNormal];
+        [_originalImageBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        _originalImageBtn.titleLabel.font = [UIFont systemFontOfSize:16.0];
+        _originalImageBtn.backgroundColor = [UIColor colorWithRed:0/255.0 green:0/255.0 blue:0/255.0 alpha:0.2];
+        _originalImageBtn.layer.cornerRadius = 3.0;
+        _originalImageBtn.layer.masksToBounds = YES;
+        _originalImageBtn.layer.borderWidth = 1.0;
+        _originalImageBtn.layer.borderColor = [UIColor whiteColor].CGColor;
+        [_originalImageBtn addTarget:self action:@selector(originalImageBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:_originalImageBtn];
+    }
+   
     
     // Toolbar Items
     if (self.displayNavArrows) {
@@ -192,7 +209,6 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     
 	// Super
     [super viewDidLoad];
-	
 }
 
 - (void)performLayout {
@@ -305,6 +321,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     _previousButton = nil;
     _nextButton = nil;
     _progressHUD = nil;
+    _originalImageBtn = nil;
     [super viewDidUnload];
 }
 
@@ -629,6 +646,9 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         [self performLayout];
         [self.view setNeedsLayout];
     }
+    if (!self.originalImageArray) {
+        _originalImageBtn.hidden = YES;
+    }
     
 }
 
@@ -810,7 +830,6 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 			}
 			[_visiblePages addObject:page];
 			[self configurePage:page forIndex:index];
-
 			[_pagingScrollView addSubview:page];
 			MWLog(@"Added page at index %lu", (unsigned long)index);
             
@@ -1188,6 +1207,14 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     }
     return index;
 }
+
+- (void)originalImageBtnClick:(UIButton *)btn {
+    _fixedPhotosArray = self.originalImageArray;
+    self.originalImageArray = nil;
+    [self performLayout];
+    [self reloadData];
+}
+
 
 #pragma mark - Video
 

@@ -72,6 +72,9 @@
     BOOL _viewHasAppearedInitially;
     CGPoint _currentGridContentOffset;
     
+    //临时加的
+    BOOL _displayImagSizeHidden;   //是否 显示查看原图 默认 显示
+    UIButton *_originalImageBtn;
 }
 
 // Properties

@@ -53,6 +53,11 @@
 @property (nonatomic) NSUInteger delayToHideElements;
 @property (nonatomic, readonly) NSUInteger currentIndex;
 
+//临时加的
+@property (nonatomic) BOOL displayImagSizeHidden;  //记录是否显示原始图片大小
+@property(nonatomic, copy) NSString *originalImageSize;
+@property(nonatomic, strong)NSArray *originalImageArray;
+
 // Customise image selection icons as they are the only icons with a colour tint
 // Icon should be located in the app's main bundle
 @property (nonatomic, strong) NSString *customImageSelectedIconName;
